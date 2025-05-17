@@ -1,0 +1,93 @@
+-- -- create table COUNTRY (
+-- -- ID int PRIMARY KEY,
+-- -- NAME varchar(50) NOT NULL);
+
+-- create table COACH(
+-- ID int primary key,
+-- NAME varchar(50) NOT NULL,
+-- AGE int NOT NULL,
+-- COUNTRY_ID int references COUNTRY(ID)
+-- );
+
+-- create table CLUB(
+-- ID int primary key,
+-- NAME varchar(50) not null,
+-- COACH_ID int references COACH(ID),
+-- COUNTRY_ID int references COUNTRY(ID)
+-- );
+
+-- create table PLAYERS(
+-- ID int primary key,
+-- NAME varchar(50) not null,
+-- AGE int not null,
+-- GOALS int not null,
+-- CLUB_ID int references CLUB(ID),
+-- COUNTRY_ID int references COUNTRY(ID)
+-- );
+
+-- insert into COUNTRY (ID,NAME) values
+-- (101,'England'),
+-- (102,'Argentina'),
+-- (109,'Portugal'),
+-- (124,'Germany'),
+-- (135,'Spain'),
+-- (136,'Italy'),
+-- (149,'Egypt'),
+-- (158,'Brazil'),
+-- (202,'France');
+-- select * from COUNTRY;
+
+-- insert into COACH (ID,NAME,AGE,COUNTRY_ID) values
+-- (2349,'Pochettino',50,102),
+-- (2648,'Allegri',54,136),
+-- (3414,'Conte',52,136),
+-- (4821,'Rangnick',63,124),
+-- (5975,'Xavi',42,135),
+-- (7456,'Klopp',54,124);
+
+-- insert into CLUB (ID,NAME,COACH_ID,COUNTRY_ID) values
+-- (635,'Liverpool',7456,101),
+-- (723,'Juventus',2648,136),
+-- (893,'Barcelona',5975,135),
+-- (897,'Manchester U',4821,101),
+-- (901,'PSG',2349,202),
+-- (975,'Tottenham',3414,101);
+
+-- insert into PLAYERS (ID,NAME,AGE,GOALS,CLUB_ID,COUNTRY_ID) values
+-- (1,'Messi',34,761,901,102),
+-- (2,'Ronaldo',37,801,897,109),
+-- (3,'Neymar',30,344,901,158),
+-- (4,'Salah',29,223,635,149),
+-- (5,'Kane',28,241,975,101);
+
+
+-- Write a query to find all clubs from ‘England’
+select * from CLUB where COUNTRY_ID in (select ID from COUNTRY where NAME='England');
+
+select * from CLUB join COUNTRY on club.country_id=COUNTRY.id where country.NAME='England'; 
+
+-- Write a query to display all the players whose coach is from the same country
+select * from PLAYERS where COUNTRY_ID in (select COUNTRY_ID from COACH where ID in (select COACH_ID from CLUB where ID=PLAYERS.CLUB_ID));
+
+select players.id,players.name,players.age,players.goals,players.club_id,players.country_id from players join coach on players.country_id = coach.country_id join club on club.coach_id = coach.id where club.id =players.club_id;
+
+-- Write a query to find all players whose club is from the same country
+select * from PLAYERS where COUNTRY_ID in(select COUNTRY_ID from CLUB where ID= PLAYERS.CLUB_ID);
+
+select players.id,players.name,players.age,players.goals,players.club_id,players.country_id from players join club on players.country_id=club.country_id where club.id=players.club_id;
+
+-- Write a query to find all coaches who are coaching for teams from different countries and ages below 59 order by age.
+select * from COACH where AGE<59 and COUNTRY_ID not in (select COUNTRY_ID from CLUB where COACH_ID=COACH.ID) order by AGE;
+
+select coach.name from coach join club on coach.id=club.coach_id where age<59 and coach.country_id <> club.country_id ;
+
+-- Write a query to create a view of the top 5 goals scored by player, country, age, goal, club, and coach 
+-- create view TOP5 as select NAME as PLAYER,
+-- (select NAME from COUNTRY where id=PLAYERS.COUNTRY_ID) as COUNTRY,
+-- AGE,
+-- GOALS,
+-- (select NAME from CLUB where id=PLAYERS.CLUB_ID) as CLUB,
+-- (select NAME from COACH where ID in(select COACH_ID from CLUB where ID=PLAYERS.CLUB_ID)) as COACH
+-- from PLAYERS
+-- order by GOALS desc;
+select * from TOP5;
